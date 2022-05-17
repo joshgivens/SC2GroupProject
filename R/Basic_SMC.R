@@ -1,15 +1,15 @@
 #' SMC sampler
 #'
-#' @param init_sample sampler function for the initial distibution. This function takes 1 argument which is the nuber of samples to taje
-#' @param proposal_sample 
-#' @param proposal_lik 
-#' @param true_lik 
-#' @param g_lik
+#' @param init_sample sampler function for the initial distribution. 
+#' This function takes 1 argument which is the number of samples to take
+#' @param proposal_sample sampler function for conditional proposal
+#' @param proposal_lik likelihood for conditional proposal
+#' @param true_lik true likelihood (up to a constant)
+#' @param g_lik likelihood of observed y given x
 #'
-#' @return
+#' @return A list containing the simulated particles and their associated weights
 #' @export
 #'
-#' @examples
 Basic_SMC <- function(init_sample,proposal_sample, proposal_lik, true_lik, g_lik=NULL, y=NULL, n=1000, timesteps=100){
   # Set up matrix for samples
   Xmat <- matrix(NA,n,timesteps)
@@ -42,5 +42,5 @@ Basic_SMC <- function(init_sample,proposal_sample, proposal_lik, true_lik, g_lik
     #Normalise weights
     Wmat[,t]=Wmat[,t]/sum(Wmat[,t])
   }
-  
+  return(list(Xmat=Xmat, Wmat=Wmat))
 }
