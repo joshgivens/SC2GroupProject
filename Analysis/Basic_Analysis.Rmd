@@ -1,0 +1,50 @@
+---
+title: "Analysis"
+author: "Josh Givens & Ettore Fincato"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+First we try a very simple case where we attempt to approximate the expectation of a Ornstein Uhlenbeck using a Brownian motion.
+
+We first set up their samplers and likelihoods
+```{r cars}
+Final_T=1
+timesteps=100
+step=Final_T/timesteps
+true_lik <- function(x,x_0){
+  ornuhl_lik(x,x_0,step,alpha=1,sigma=1)
+}
+
+approx_lik <- function(x,x_0){
+  brown_lik(x,x_0,step,sigma=1)
+}
+
+sampler <- function(x_0){
+  brown_samp(1,x_0,step,sigma=1)
+}
+
+g <- function(x){x^2}
+```
+
+```{r}
+out=diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
+         M_T_lik = rep(list(approx_lik),timesteps), n=1000,timesteps = timesteps,
+         varphi = 1,x_0=10)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+basic_norm(out$Wmat)
+
+harmonic_norm(out$gmat[,100],out$Wmat,1)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
