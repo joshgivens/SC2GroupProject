@@ -26,6 +26,12 @@ This function takes 1 argument which is the number of samples to take}
 \item{true_lik}{true likelihood (up to a constant)}
 
 \item{g_lik}{likelihood of observed y given x}
+
+\item{y}{A vector containing our observed samples}
+
+\item{n}{The number of particles to simulate}
+
+\item{timesteps}{The number of time-steps to model for each particle}
 }
 \value{
 A list containing the simulated particles and their associated weights

@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 First we try a very simple case where we attempt to approximate the expectation of a Ornstein Uhlenbeck using a Brownian motion.
 
 We first set up their samplers and likelihoods
-```{r cars}
+```{r}
 Final_T=1
 timesteps=100
 step=Final_T/timesteps
@@ -28,23 +28,106 @@ sampler <- function(x_0){
   brown_samp(1,x_0,step,sigma=1)
 }
 
+true_sampler <- function(x_0){
+  ornuhl_samp(1,x_0,t=step,sigma=1,alpha=1)
+}
+
 g <- function(x){x^2}
 ```
 
 ```{r}
 out=diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
          M_T_lik = rep(list(approx_lik),timesteps), n=1000,timesteps = timesteps,
-         varphi = 1,x_0=10)
+         varphi = 1,x_0=0.01)
+
+out2=diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(true_sampler),timesteps),
+         M_T_lik = rep(list(true_lik),timesteps), n=1000,timesteps = timesteps,
+         varphi = 1,x_0=0.01)
+
+out3 <- diff_SMC(g=g,p_delta=approx_lik,M_T_samplers = rep(list(sampler),timesteps),
+         M_T_lik = rep(list(approx_lik),timesteps), n=1000,timesteps = timesteps,
+         varphi = 1,x_0=0.01)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
+## Test accuracy
 
 ```{r pressure, echo=FALSE}
 basic_norm(out$Wmat)
+basic_norm(out2$Wmat)
+basic_norm(out3$Wmat)
+
+
 
 harmonic_norm(out$gmat[,100],out$Wmat,1)
+harmonic_norm(out2$gmat[,100],out$Wmat,1)
+```
+## Try true sampler with 100 steps
+```{r}
+true_sampler2 <- function(x_0){
+  ornuhl_sample(1,x_0,t=1,sigma=1,alpha=1)
+}
+
+out_true <- discrete_sampler(true_sampler,x_0=0.01,timesteps = timesteps,n=1000)
+out_true2 <- discrete_sampler(true_sampler2,x_0=0.01,timesteps = 1,n=1000)
+#out_brown <- discrete_sampler(sampler,x_0=0.01,timesteps=timesteps,n=1000)
+
+mean(g(out_true2[,2]))
+mean(g(out_true[,101]))
+#true
+(1-exp(-2))+(0.01*exp(-1))
+```
+## Plot True samplers
+```{r}
+par(mfrow=c(1,2))
+plot(out_true[1,],type="l",ylim=c(-0.4,0.4))
+for (i in 1:10){
+  lines(out_true[i,],col=i)
+}
+
+plot(out_brown[1,],type="l",ylim=c(-2,2))
+for (i in 1:10){
+  lines(out_brown[i,],col=i)
+}
+```
+# Sine Model
+```{r}
+Final_T=1
+timesteps=20
+step=Final_T/timesteps
+
+sampler <- function(x_0){
+  sin_samp(1,x_0,step,pi)
+}
+
+true_lik <- function(x,x_0){
+  sin_lik(x,x_0,step,pi)
+}
+
+g <- function(x){
+  zeta <- 100
+  omega2 <- 1e-30
+  diff=sqrt(zeta)-omega2
+  if(x>-diff & x<diff){
+    return(
+      exp(1/(zeta-x^2))
+    )
+  }
+  else{
+    return(0)
+  }
+}
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Now run simulations
+```{r}
+out <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
+         M_T_lik = rep(list(true_lik),timesteps), n=1000,timesteps = timesteps,
+         varphi = 1,x_0=0)
+
+out_exact <-discrete_sampler(s)
+
+harmonic_norm(out$gmat[,20],out$Wmat,1)
+```
+
+

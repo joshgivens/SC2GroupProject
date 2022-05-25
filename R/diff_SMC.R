@@ -23,17 +23,13 @@ diff_SMC <- function(g,p_delta,M_T_samplers,M_T_lik,n=1000,timesteps=100,varphi=
   # 1st sample points from initial distribution
   
   #Calculate init g-value  
-  g_0=g(x_0)
-  g_0_transf=abs(g_0)^varphi
   for (i in 1:n){
     Xmat[i,1] <- M_T_samplers[[1]](x_0)
     gmat[i,1] <- g(Xmat[i,1])
     gmat_transf[i,1] <- abs(gmat[i,1])^varphi 
     Wmat[i,1] <- gmat_transf[i,1]*p_delta(Xmat[i,1],x_0)/
-      (g_0_transf*M_T_lik[[1]](Xmat[i,1],x_0))
+      (M_T_lik[[1]](Xmat[i,1],x_0))
   }
-  #renormalise weights
-  Wmat[,1] <- Wmat[,1]
   
   for (t in 2:timesteps){
     # resample previous iter to get new points
@@ -46,8 +42,8 @@ diff_SMC <- function(g,p_delta,M_T_samplers,M_T_lik,n=1000,timesteps=100,varphi=
       #Get weights associated with new sample
       gmat[i,t] <- g(Xmat[i,t])
       gmat_transf[i,t] <- abs(gmat[i,t])^varphi
-      Wmat[i,t] <- gmat[i,t]*p_delta(Xmat[i,t],Xmat[i,t-1])/
-        (gmat[i,t-1]*M_T_lik[[1]](Xmat[i,t],Xmat[i,t-1]))
+      Wmat[i,t] <- gmat_transf[i,t]*p_delta(Xmat[i,t],Xmat[i,t-1])/
+        (gmat_transf[i,t-1]*M_T_lik[[t]](Xmat[i,t],Xmat[i,t-1]))
     }
   }
   return(list(Xmat=Xmat, Wmat=Wmat, gmat=gmat))

@@ -6,6 +6,9 @@
 #' @param proposal_lik likelihood for conditional proposal
 #' @param true_lik true likelihood (up to a constant)
 #' @param g_lik likelihood of observed y given x
+#' @param y A vector containing our observed samples
+#' @param n The number of particles to simulate
+#' @param timesteps The number of time-steps to model for each particle
 #'
 #' @return A list containing the simulated particles and their associated weights
 #' @export
