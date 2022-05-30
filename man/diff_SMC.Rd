@@ -2,7 +2,7 @@
 % Please edit documentation in R/diff_SMC.R
 \name{diff_SMC}
 \alias{diff_SMC}
-\title{Title}
+\title{SMC Sampler 2}
 \usage{
 diff_SMC(
   g,
@@ -12,7 +12,8 @@ diff_SMC(
   n = 1000,
   timesteps = 100,
   varphi = 1,
-  x_0
+  x_0,
+  resample = T
 )
 }
 \arguments{
@@ -31,10 +32,12 @@ diff_SMC(
 \item{varphi}{varphi function used in approximation}
 
 \item{x_0}{starting value}
+
+\item{resample}{Logical indicating whether to resample or not}
 }
 \value{
 A list containing the simulated particles and their associated weights
 }
 \description{
-Title
+Samples using SMC as in the framework laid out in ...
 }

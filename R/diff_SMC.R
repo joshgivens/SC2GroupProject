@@ -1,4 +1,6 @@
-#' Title
+#' SMC Sampler 2
+#' 
+#' Samples using SMC as in the framework laid out in ...
 #'
 #' @param g Function which we are taking expectation over
 #' @param p_delta true transition kernel between discrete time steps
@@ -8,11 +10,12 @@
 #' @param timesteps Number of time-steps to simulate
 #' @param varphi varphi function used in approximation
 #' @param x_0 starting value
+#' @param resample Logical indicating whether to resample or not
 #'
 #' @return A list containing the simulated particles and their associated weights
 #' @export
 #'
-diff_SMC <- function(g,p_delta,M_T_samplers,M_T_lik,n=1000,timesteps=100,varphi=1,x_0){
+diff_SMC <- function(g,p_delta,M_T_samplers,M_T_lik,n=1000,timesteps=100,varphi=1,x_0,resample=T){
   # Set up matrix for samples
   Xmat <- matrix(NA,n,timesteps)
   # Set up matrix for weights
@@ -32,9 +35,16 @@ diff_SMC <- function(g,p_delta,M_T_samplers,M_T_lik,n=1000,timesteps=100,varphi=
   }
   
   for (t in 2:timesteps){
-    # resample previous iter to get new points
-    x_sampled <- sample(Xmat[,t-1],size=n,replace=TRUE,
-                        prob=Wmat[,t-1]/sum(Wmat[,t-1]))
+    if (resample){
+      #resample previous iter to get new points
+      x_sampled <- sample(Xmat[,t-1],size=n,replace=TRUE,
+                          prob=Wmat[,t-1]/sum(Wmat[,t-1]))
+      Wmat[,t] <- 1
+    }
+    else{
+      x_sampled <- Xmat[,t-1] 
+      Wmat[,t] <- Wmat[,t-1]
+    }
     
     for(i in 1:n){
       #Get new sample
@@ -42,7 +52,7 @@ diff_SMC <- function(g,p_delta,M_T_samplers,M_T_lik,n=1000,timesteps=100,varphi=
       #Get weights associated with new sample
       gmat[i,t] <- g(Xmat[i,t])
       gmat_transf[i,t] <- abs(gmat[i,t])^varphi
-      Wmat[i,t] <- gmat_transf[i,t]*p_delta(Xmat[i,t],Xmat[i,t-1])/
+      Wmat[i,t] <- Wmat[i,t]*gmat_transf[i,t]*p_delta(Xmat[i,t],Xmat[i,t-1])/
         (gmat_transf[i,t-1]*M_T_lik[[t]](Xmat[i,t],Xmat[i,t-1]))
     }
   }

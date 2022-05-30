@@ -41,6 +41,6 @@ ornuhl_samp <- function(n,x_0,t,sigma,alpha){
 #' @export
 #'
 sin_samp <- function(n,x_0,t,omega){
-  mean <- sin(x_0-omega)+x_0*t
+  mean <- sin(x_0-omega)*t+x_0
   rnorm(n,mean=mean,sd=t)
 }

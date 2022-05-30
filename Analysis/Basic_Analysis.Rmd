@@ -3,64 +3,11 @@ title: "Analysis"
 author: "Josh Givens & Ettore Fincato"
 output: pdf_document
 ---
-
+\newcommand{\diff}{\mathrm{d}}
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-First we try a very simple case where we attempt to approximate the expectation of a Ornstein Uhlenbeck using a Brownian motion.
-
-We first set up their samplers and likelihoods
-```{r}
-Final_T=1
-timesteps=100
-step=Final_T/timesteps
-true_lik <- function(x,x_0){
-  ornuhl_lik(x,x_0,step,alpha=1,sigma=1)
-}
-
-approx_lik <- function(x,x_0){
-  brown_lik(x,x_0,step,sigma=1)
-}
-
-sampler <- function(x_0){
-  brown_samp(1,x_0,step,sigma=1)
-}
-
-true_sampler <- function(x_0){
-  ornuhl_samp(1,x_0,t=step,sigma=1,alpha=1)
-}
-
-g <- function(x){x^2}
-```
-
-```{r}
-out=diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
-         M_T_lik = rep(list(approx_lik),timesteps), n=1000,timesteps = timesteps,
-         varphi = 1,x_0=0.01)
-
-out2=diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(true_sampler),timesteps),
-         M_T_lik = rep(list(true_lik),timesteps), n=1000,timesteps = timesteps,
-         varphi = 1,x_0=0.01)
-
-out3 <- diff_SMC(g=g,p_delta=approx_lik,M_T_samplers = rep(list(sampler),timesteps),
-         M_T_lik = rep(list(approx_lik),timesteps), n=1000,timesteps = timesteps,
-         varphi = 1,x_0=0.01)
-```
-
-## Test accuracy
-
-```{r pressure, echo=FALSE}
-basic_norm(out$Wmat)
-basic_norm(out2$Wmat)
-basic_norm(out3$Wmat)
-
-
-
-harmonic_norm(out$gmat[,100],out$Wmat,1)
-harmonic_norm(out2$gmat[,100],out$Wmat,1)
-```
 ## Try true sampler with 100 steps
 ```{r}
 true_sampler2 <- function(x_0){
@@ -90,19 +37,32 @@ for (i in 1:10){
 }
 ```
 # Sine Model
+We first set-up the model which is
+$$
+\mathrm{d}X_t=\sin(X_t-\omega)\diff t+\diff W_t
+$$
+We use discrete time approximations and approximate $X_{t+\Delta t'}|X_t=x\dot\sim N(x+\sin(x-\omega)t',t'^2)$
+
+
 ```{r}
+#Set our final timepoints
 Final_T=1
+#Set number of timesteps we will use
 timesteps=20
+#Get the size of each timestep
 step=Final_T/timesteps
 
+#Create sampling function
 sampler <- function(x_0){
   sin_samp(1,x_0,step,pi)
 }
 
+# Create Likelihood Function
 true_lik <- function(x,x_0){
   sin_lik(x,x_0,step,pi)
 }
 
+# Create g function
 g <- function(x){
   zeta <- 100
   omega2 <- 1e-30
@@ -119,15 +79,64 @@ g <- function(x){
 
 ```
 
-Now run simulations
+Plot the function $g$
+
 ```{r}
+x <- seq(from=-10+1e-15,to=10-1e-15,by=0.1)
+y=rep(NA,length(x))
+for(i in 1:length(x)){
+  y[i] <- g(x[i])
+}
+plot(x,y,type="l",ylim=c(0,2),xlim=c(-11,11))
+lines(c(10,11),y=c(0,0))
+lines(-c(10,11),y=c(0,0))
+
+```
+
+Now we can run simulations
+```{r}
+#Simultate 1000 particles
+n <- 10000
+
 out <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
-         M_T_lik = rep(list(true_lik),timesteps), n=1000,timesteps = timesteps,
-         varphi = 1,x_0=0)
+         M_T_lik = rep(list(true_lik),timesteps), n = n, timesteps = timesteps,
+         varphi = 0.9,x_0=5,resample = T)
 
-out_exact <-discrete_sampler(s)
-
-harmonic_norm(out$gmat[,20],out$Wmat,1)
+log(harmonic_norm(out$gmat[,timesteps],out$Wmat,0.9))
+log(basic_norm(out$Wmat))
+```
+Now do this 10 times at each time-point
+```{r}
+x_0s <- c(-5,-4,-2.5,-1,0,1,2.5,4,5)
+Preds <- matrix(NA,nrow=length(x_0s),ncol=10)
+set.seed(1234)
+for (i in 1:length(x_0s)){
+  for (j in 1:10){
+    out <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
+         M_T_lik = rep(list(true_lik),timesteps), n = n, timesteps = timesteps,
+         varphi = 0.9,x_0=x_0s[i],resample = T)
+    Preds[i,j] <- log(harmonic_norm(out$gmat[,timesteps],out$Wmat,0.9))
+  }
+}
 ```
 
 
+Now plot
+```{r}
+plot(x_0s,rowMeans(Preds),type="l")
+```
+
+Now show why things don't work without re-weighting
+```{r}
+out2 <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
+         M_T_lik = rep(list(true_lik),timesteps), n=1000,timesteps = timesteps,
+         varphi = 0.9,x_0=3,resample = F)
+log(harmonic_norm(out2$gmat[,timesteps],out$Wmat,0.5))
+log(basic_norm(out2$Wmat))
+```
+The harmonic mean approach is still stable while the normalising constant approach is not.
+
+```{r}
+out <- diff_SMC_sin(x_0=5,t=step,n=10000,timesteps=timesteps,varphi=0.9,TRUE)
+log(harmonic_norm(out$gmat[,timesteps],out$Wmat,0.9))
+```
