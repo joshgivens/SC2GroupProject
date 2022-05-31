@@ -22,3 +22,12 @@ A single value giving the estimated normalising constant.
 This function calculates the normalising constant using the harmonic mean. 
 This should only be used when the proposal sampler is identical to the density.
 }
+\details{
+If \eqn{x_t^{i},~w_t^{(j)}} represent the sample and unnormalised weight from 
+particle \eqn{j} at time \eqn{t} the this functio calculates the normalising constant as:
+\deqn{\frac{\sum_{j=1}^N |g(x_T^{(j)})|^{1-\varphi}\prod_{t=1}^T w_t^{(j)}}
+{\sum_{j=1}^N |g(x_T^{(j)})|^{-\varphi}\prod_{t=1}^T w_t^{(j)}}.}
+
+This function is specifically for use with samples from \code{diff_SMC} or \code{diff_SMC_sin} 
+only in the case where we use the same transition kernel as the true transition kernel.
+}

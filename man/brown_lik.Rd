@@ -4,7 +4,7 @@
 \alias{brown_lik}
 \title{Brownian Motion Step Likelihood}
 \usage{
-brown_lik(x, x_0, t, sigma, log = F)
+brown_lik(x, x_0, t, sigma, log = FALSE)
 }
 \arguments{
 \item{x}{The proposed value of x}
@@ -13,7 +13,7 @@ brown_lik(x, x_0, t, sigma, log = F)
 
 \item{t}{the time between steps}
 
-\item{sigma}{the variance parameter}
+\item{sigma}{the variance parameter for the Brownian Motion}
 
 \item{log}{Logical indicating whether the log-likelihood should be returned}
 }

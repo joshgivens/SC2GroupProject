@@ -23,5 +23,10 @@ ornuhl_lik(x, x_0, t, alpha, sigma, log = F)
 A single number giving the likelihood of the step
 }
 \description{
-This gives the exact likelihood of a step in Brownian Motion conditional on the starting point
+This gives the exact likelihood of a step in Brownian Motion conditional on the starting point.
+}
+\details{
+This function calculates the likelihood of a step in an Ornstein-Uhlenbeck Process. This process is of the form
+\eqn{\mathrm{d}X_t=\exp{-\alpha X_t}\mathrm{d}t+\sigma\mathrm{d}Wt}. Which has transition kernel after time t given by
+\deqn{p_t(x,x_0)=\sqrt{\frac{\alpha}{\sigma(1-\exp(-2\alpha t))}}\exp\{\frac{-\alpha(x-x_0\exp(-\alpha t))^2}{2\sigma(1-\exp(-2\alpha t))}\}}
 }

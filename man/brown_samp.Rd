@@ -19,5 +19,5 @@ brown_samp(n, x_0, t, sigma)
 A vector containing samples from the Brownian Motion
 }
 \description{
-Brownian Motion Step Sampler
+Generates a sample after fixed time from Brownian motion given starting point.
 }

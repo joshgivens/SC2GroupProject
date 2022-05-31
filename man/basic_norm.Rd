@@ -16,3 +16,9 @@ A single value which is the estimate of the normalising constant.
 \description{
 This function Calculates the normalising constant of a distribution from SMC samples from said distribution.
 }
+\details{
+Where \eqn{w_t^{(j)}} represents the un-normalised weight from particle \eqn{j} and time \eqn{t}, 
+this function calculates the normalising constant of the associated distribution as:
+\deqn{\prod_{t=1}^T\frac{1}{N}\sum_{j=1}^N w_t^{(j)}.}
+(where \eqn{T} is our final time-point and we have \eqn{N} total particles.)
+}

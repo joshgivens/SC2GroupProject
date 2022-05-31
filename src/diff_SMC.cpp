@@ -14,7 +14,6 @@ using namespace Rcpp;
 //
 NumericVector g(NumericVector x){
   double zeta=100.;
-  double sqrt_zeta=sqrt(zeta);
   double omega2=1e-15;
   LogicalVector logicv=(x>(omega2-sqrt(zeta))) & (x<(sqrt(zeta)-omega2));
   NumericVector out_vector=ifelse(logicv,exp(1/(zeta-pow(x,2))),0.);
@@ -41,19 +40,29 @@ double sin_lik(double x, double x_0, double t){
 
 //' SMC Sampler 2
 //' 
-//' Samples using SMC as in the framework laid out in ...
+//' Samples using SMC as in the framework laid out in \insertCite{doucet}{SC2GroupProject}.
+//' This function uses the SMC framework to implement Example 1 of Section 5.3 in 
+//' \insertCite{doucet}{SC2GroupProject} given in section 5.2.
 //'
-//' @param g Function which we are taking expectation over
-//' @param p_delta true transition kernel between discrete time steps
-//' @param M_T_samplers list of samplers for T approximating transition kernels
-//' @param M_T_lik list of likelihood for T approximating kernels
-//' @param n Number of particles to simulate
-//' @param timesteps Number of time-steps to simulate
-//' @param varphi varphi function used in approximation
 //' @param x_0 starting value
+//' @param t The length of each time-step. 
+//' @param n Number of particles to simulate
+//' @param timesteps Number of time-steps to simulate (`t*timesteps` should give the end time.) 
+//' @param varphi varphi function used in approximation
 //' @param resample Logical indicating whether to resample or not
 //'
-//' @return A list containing the simulated particles and their associated weights
+//' @examples 
+//' # Generate 10,000 samples and at 20 time-steps up to time 1
+//' out <- diff_SMC_sin(x_0=5, t=1/20, n=10000, timesteps=20, varphi=0.9,TRUE)
+//' @return A list with matrices containing various information from each observation, each entry gives an individual observation with 
+//' each column being a separate time-point and reach row being a separate  particle
+//' \item{Xmat - }{A matrix containing the simulated samples.}
+//' \item{Wmat - }{A matrix containing the weights associated with each sample}
+//' \item{gmat - }{A matrix containing the value of the function g evaulated at each sample.}
+//'  
+//' @references
+//' \insertRef{doucet}{SC2GroupProject}
+//'  
 //' @export
 // [[Rcpp::export]]
 List diff_SMC_sin(double x_0,double t,int n, int timesteps, double varphi, bool resample) {
