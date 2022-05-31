@@ -3,32 +3,31 @@
 \alias{SC2GroupProject}
 \docType{package}
 \title{
-  A short title line describing what the package does
+  Performs SMC algorithms.
 }
 \description{
-  A more detailed description of what the package does. A length
-  of about one to five lines is recommended.
+This package implements various SMC algorithms specifically for use in diffusion processes. Alongside this there are samplers and transition probability function for various common Feynman-Kac processes. 
 }
 \details{
-  This section should provide a more detailed overview of how to use the
-  package, including the most important functions.
+This package should main be used to implement standard SMC approaches for diffusion processes or exact SMC approaches. The basic SMC algorithm can be used in the function \code{Basic_SMC}.
+
+To use the SMC process given in \insertCite{doucet}{SC2GroupProject} one can use the function \code{diff_SMC}.
+
+Finally a specific C++ implementation of \code{diff_SMC} for the case given in Example 1 of \insertCite{doucet}{SC2GroupProject} can be found in the function \code{diff_SMS_sin}. This version provides 30 times speed up over the R version.
 }
 \author{
-Your Name, email optional.
+Josh Givens, Ettore Fincato.
 
-Maintainer: Your Name <your@email.com>
+Maintainer: Josh Givens <josh.givens@bristol.ac.uk>
 }
 \references{
-  This optional section can contain literature or other references for
-  background information.
+\insertRef{doucet}{SC2GroupProject}
 }
 \keyword{ package }
-\seealso{
-  Optional links to other man pages
-}
+
 \examples{
   \dontrun{
-     ## Optional simple examples of the most important functions
-     ## These can be in \dontrun{} and \donttest{} blocks.   
+    # Generate 10,000 samples and at 20 time-steps up to time 1
+    out <- diff_SMC_sin(x_0=5, t=1/20, n=10000, timesteps=20, varphi=0.9,TRUE)  
   }
 }

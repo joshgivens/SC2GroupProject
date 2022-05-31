@@ -24,5 +24,5 @@ This function samples an approximate step from a sinusoidal Brownian Motion.
 \details{
 The true diffusion process we are attempting to sample from is \eqn{\mathrm{d}X_t=\sin(X_t-\omega)\mathrm{d}t+\mathrm{d}W_t}. 
 We approximate this at time `t` by sampling with transition kernel: 
-\deqn{p_t(x,x_0)=\sqrt{\frac{1}{2\pi t^2}}\exp\{\frac{-(x-\sin(x_0-\omega)*t+x_0)^2}{2t^2}\}}
+\deqn{p_t(x,x_0)=\sqrt{\frac{1}{2\pi t^2}}\exp\{\frac{-(x-\sin(x_0-\omega)t+x_0)^2}{2t^2}\}}
 }

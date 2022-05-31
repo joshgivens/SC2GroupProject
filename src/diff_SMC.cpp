@@ -38,11 +38,20 @@ double sin_lik(double x, double x_0, double t){
 
 
 
-//' SMC Sampler 2
+//' SMC Sampler Sin
 //' 
 //' Samples using SMC as in the framework laid out in \insertCite{doucet}{SC2GroupProject}.
 //' This function uses the SMC framework to implement Example 1 of Section 5.3 in 
 //' \insertCite{doucet}{SC2GroupProject} given in section 5.2.
+//' 
+//' This function carries out the \code{diff_SMC framework} for the following scenario.
+//' The diffusion process is \eqn{\mathrm{d}X_t=\sin(X_t-\omega)\mathrm{d}_t\mathrm{d}W_t}
+//' which we approximate with discrete time transition kernel
+//' \deqn{p^e_{\Delta t}(x,x_0)=\sqrt{\frac{1}{2\pi \Delta t^2}}\exp\{\frac{-(x-\sin(x_0-\omega)\Delta t+x_0)^2}{2\Delta t^2}\}}
+//' \eqn{g} is given by
+//' \deqn{g(x)=\begin{cases}\exp\{\frac{1}{\zeta-x^2}\}\quad\text{if }x\in(\sqrt{\zeta}-\omega',\omega'-\sqrt{\zeta})\\
+//'   0\quad\text{o/w}\end{cases}}
+//' For \eqn{\zeta=100,~\omega'=1e^{-30}}.
 //'
 //' @param x_0 starting value
 //' @param t The length of each time-step. 

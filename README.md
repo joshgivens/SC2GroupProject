@@ -79,9 +79,9 @@ functions.
 
 ``` r
 log(harmonic_norm(out$gmat[,timesteps],out$Wmat,0.9))
-#> [1] 0.01001811
+#> [1] 0.01001776
 log(basic_norm(out$Wmat))
-#> [1] 0.009016305
+#> [1] 0.009015988
 ```
 
 Both these give approximations of
@@ -106,6 +106,8 @@ lines(-c(10,11),y=c(0,0))
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
+### C++ implementation
+
 As well as an R implementation of this sampler we have included a C++
 implementation which is significantly quicker. This implementation is
 specialised to this exact case and can be found in the function
@@ -121,9 +123,9 @@ out <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps)
 
 
 log(harmonic_norm(out$gmat[,timesteps],out$Wmat,0.9))
-#> [1] 0.01001807
+#> [1] 0.0100178
 log(harmonic_norm(out_cpp$gmat[,timesteps],out$Wmat,0.9))
-#> [1] 0.01001794
+#> [1] 0.01001759
 ```
 
 We now show that this process gives significant speed increases
@@ -138,10 +140,12 @@ microbenchmark(C_version = diff_SMC_sin(x_0=1,t=step,n=10000,timesteps=timesteps
                  varphi = 0.9,x_0=1,resample = T),
                times = 10)
 #> Unit: relative
-#>       expr      min       lq     mean  median       uq      max neval
-#>  C_version  1.00000  1.00000  1.00000  1.0000  1.00000  1.00000    10
-#>  R_version 30.50787 28.52529 28.39146 28.2005 27.70722 27.87073    10
+#>       expr      min       lq     mean   median       uq      max neval
+#>  C_version  1.00000  1.00000  1.00000  1.00000  1.00000  1.00000    10
+#>  R_version 29.37307 31.44712 29.02672 29.66867 27.03834 26.34815    10
 ```
+
+### Approximations for various ![x_0](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;x_0 "x_0")
 
 We see that the C++ versions is almost 30 times faster which is
 impressive. We now use this to perform approximations for various values
@@ -173,6 +177,7 @@ for (i in 1:length(x_0s)){
 We now plot the estimations alongside there standard deviations.
 
 ``` r
+library(latex2exp)
 library(ggplot2)
 Preds_sum <- Preds %>% group_by(x_0) %>% 
   summarise(mean=mean(estimate),
@@ -180,7 +185,8 @@ Preds_sum <- Preds %>% group_by(x_0) %>%
             upper=mean+sd,lower=mean-sd)
 
 ggplot(Preds_sum,aes(x=x_0,y=mean,ymin=lower,ymax=upper))+geom_line()+
-  geom_errorbar()
+  geom_errorbar()+labs(x=TeX("$x_0$"),y=TeX("$\\log E_{x_0}(g(X_1))$"))+
+  scale_x_continuous(breaks=x_0s,minor_breaks = seq(from=-6,to=6,by=0.5))
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
@@ -211,15 +217,20 @@ Preds_sum2 <- Preds2 %>% group_by(timesteps,x_0) %>%
 #> `.groups` argument.
 
 ggplot(Preds_sum2,aes(x=x_0,y=mean,ymin=lower,ymax=upper,colour=factor(timesteps)))+geom_line()+
-  geom_errorbar()
+  geom_errorbar()+labs(x=TeX("$x_0$"),y=TeX("$\\log E_{x_0}(g(X_1))$"),colour="Time-steps")+
+  scale_x_continuous(breaks=x_0s,minor_breaks = seq(from=-6,to=6,by=0.5))
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" /> \#
-Additional Content \## True Samplers As well as the implementations
-shown above we have various other functions which can help with SMC.
-First of all we have implemented a method to do direct discrete sampling
-as well the the exact transition kernels for both Brownian Motion and
-Ornstein-Uhlenbeck Process.
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+
+## Additional Content
+
+### True Samplers
+
+As well as the implementations shown above we have various other
+functions which can help with SMC. First of all we have implemented a
+method to do direct discrete sampling as well the the exact transition
+kernels for both Brownian Motion and Ornstein-Uhlenbeck Process.
 
 Here is an example of various simulated particles from Brownian Motion.
 
@@ -236,9 +247,12 @@ for (i in 1:10){
 }
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" /> \##
-Standard SMC We have also implemented a standard SMC sampler for use
-with any diffusions process
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+### Standard SMC
+
+We have also implemented a standard SMC sampler for use with any
+diffusions process
 
 Below is a demonstration of using a Brownian Motion to generate samples
 from and Ornstein-Uhlenbeck process with
@@ -300,7 +314,7 @@ out <- Basic_SMC(init_sample=init_sample,
                  timesteps=timesteps)
 ```
 
-## Non-reweighted approach
+### Non-reweighted approach
 
 There is also an option in both `diff_SMC` and `diff_SMC_sin` to not do
 re-sampling and simply compound the weights. This is generally note
@@ -314,7 +328,7 @@ in the end weights?
 #Set our final timepoints
 Final_T=1
 #Set number of timesteps we will use
-timesteps=20
+timesteps=100
 #Get the size of each timestep
 step=Final_T/timesteps
 
@@ -333,16 +347,72 @@ g <- function(x){x^2}
 
 #Simulate 1,000 particles
 out_resamp <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
-         M_T_lik = rep(list(true_lik),timesteps), n = 1000, timesteps = timesteps,
+         M_T_lik = rep(list(true_lik),timesteps), n = 100, timesteps = timesteps,
          varphi = 0.9,x_0=1,resample = TRUE)
 #Simulate 1,000 particles
 out_nonresamp <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps),
-         M_T_lik = rep(list(true_lik),timesteps), n = 1000, timesteps = timesteps,
+         M_T_lik = rep(list(true_lik),timesteps), n = 100, timesteps = timesteps,
          varphi = 0.9,x_0=1,resample = FALSE)
 
-# This is not what we would expect.
-var(out_resamp$Wmat[,timesteps])
-#> [1] 0.2671712
-var(out_nonresamp$Wmat[,timesteps])
-#> [1] 0.01669416
+# Now normalise the weights to add up to 1
+norm_W_resamp <- out_resamp$Wmat[,timesteps]/sum(out_resamp$Wmat[,timesteps])
+norm_W_nonresamp <-  out_nonresamp$Wmat[,timesteps]/sum(out_nonresamp$Wmat[,timesteps])
+
+#Compare standard deviations
+sd(norm_W_resamp)
+#> [1] 0.001952011
+sd(norm_W_nonresamp)
+#> [1] 0.003335453
 ```
+
+As we can see the non-resampled weightings give double the standard
+deviation of the resampled weightings.
+
+### Timings
+
+What our algorithm has over the original paper is speed. We demonstrate
+this now be exactly mimicking their set-up. This is 5 starting points,
+10 times each with 1,000 particles and 20 time-points. Overall this took
+them 76.5 seconds.
+
+``` r
+x_0s <- c(-5,-2.5,0,2.5,5)
+preds <- rep(NA,10*length(x_0s))
+index <- 1
+start_time <- Sys.time()
+for (i in 1:length(x_0s)){
+  for (j in 1:10){
+    out <- diff_SMC_sin(x_0=x_0s[i],t=1/20,n=1000,timesteps=20,varphi=0.9,TRUE)
+    preds[i] <- log(harmonic_norm(out$gmat[,20],out$Wmat,0.9))
+    index=index+1
+  }
+}
+end_time <- Sys.time()
+
+print(end_time-start_time)
+#> Time difference of 0.3894539 secs
+```
+
+That’s over 150 time speed up.
+
+As the time is so short we do 100 iterations at each point and then
+divide the time by 10.
+
+``` r
+preds <- rep(NA,100*length(x_0s))
+index <- 1
+start_time <- Sys.time()
+for (i in 1:length(x_0s)){
+  for (j in 1:100){
+    out <- diff_SMC_sin(x_0=x_0s[i],t=1/20,n=1000,timesteps=20,varphi=0.9,TRUE)
+    preds[i] <- log(harmonic_norm(out$gmat[,20],out$Wmat,0.9))
+    index=index+1
+  }
+}
+end_time <- Sys.time()
+
+print((end_time-start_time)/10)
+#> Time difference of 0.3800671 secs
+```
+
+Even shorter!

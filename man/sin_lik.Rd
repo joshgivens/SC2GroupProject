@@ -26,5 +26,5 @@ This gives the approximate likelihood of a step in Sinusoidal Brownian Motion co
 \details{
 The true diffusion process we are attempting to obtain likelihoods from is \eqn{\mathrm{d}X_t=\sin(X_t-\omega)\mathrm{d}t+\mathrm{d}W_t}. 
 We approximate this at time `t` with transition kernel: 
-\deqn{p_t(x,x_0)=\sqrt{\frac{1}{2\pi t^2}}\exp\{\frac{-(x-\sin(x_0-\omega)*t+x_0)^2}{2t^2}\}}
+\deqn{p_t(x,x_0)=\sqrt{\frac{1}{2\pi t^2}}\exp\{\frac{-(x-\sin(x_0-\omega)t+x_0)^2}{2t^2}\}}
 }

@@ -46,7 +46,7 @@ ornuhl_lik <- function(x,x_0,t,alpha,sigma,log=F){
 #'
 #' The true diffusion process we are attempting to obtain likelihoods from is \eqn{\mathrm{d}X_t=\sin(X_t-\omega)\mathrm{d}t+\mathrm{d}W_t}. 
 #' We approximate this at time `t` with transition kernel: 
-#' \deqn{p_t(x,x_0)=\sqrt{\frac{1}{2\pi t^2}}\exp\{\frac{-(x-\sin(x_0-\omega)*t+x_0)^2}{2t^2}\}}
+#' \deqn{p_t(x,x_0)=\sqrt{\frac{1}{2\pi t^2}}\exp\{\frac{-(x-\sin(x_0-\omega)t+x_0)^2}{2t^2}\}}
 #' 
 #' @param x The proposed value of x
 #' @param x_0 the current value of x
