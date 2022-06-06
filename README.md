@@ -1,6 +1,18 @@
 README
 ================
 
+-   [SC2GroupProject](#sc2groupproject)
+    -   [Installation](#installation)
+    -   [Main Problem](#main-problem)
+        -   [C++ implementation](#c-implementation)
+        -   [Approximations for various
+            ![x_0](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;x_0 "x_0")](#approximations-for-various-x_0)
+    -   [Additional Content](#additional-content)
+        -   [True Samplers](#true-samplers)
+        -   [Standard SMC](#standard-smc)
+        -   [Non-reweighted approach](#non-reweighted-approach)
+        -   [Timings](#timings)
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # SC2GroupProject
@@ -79,9 +91,9 @@ functions.
 
 ``` r
 log(harmonic_norm(out$gmat[,timesteps],out$Wmat,0.9))
-#> [1] 0.01001776
+#> [1] 0.01001911
 log(basic_norm(out$Wmat))
-#> [1] 0.009015988
+#> [1] 0.009017203
 ```
 
 Both these give approximations of
@@ -123,9 +135,9 @@ out <- diff_SMC(g=g,p_delta=true_lik,M_T_samplers = rep(list(sampler),timesteps)
 
 
 log(harmonic_norm(out$gmat[,timesteps],out$Wmat,0.9))
-#> [1] 0.0100178
+#> [1] 0.01001766
 log(harmonic_norm(out_cpp$gmat[,timesteps],out$Wmat,0.9))
-#> [1] 0.01001759
+#> [1] 0.01001775
 ```
 
 We now show that this process gives significant speed increases
@@ -140,9 +152,9 @@ microbenchmark(C_version = diff_SMC_sin(x_0=1,t=step,n=10000,timesteps=timesteps
                  varphi = 0.9,x_0=1,resample = T),
                times = 10)
 #> Unit: relative
-#>       expr      min       lq     mean   median       uq      max neval
-#>  C_version  1.00000  1.00000  1.00000  1.00000  1.00000  1.00000    10
-#>  R_version 29.37307 31.44712 29.02672 29.66867 27.03834 26.34815    10
+#>       expr      min      lq     mean   median       uq      max neval
+#>  C_version  1.00000  1.0000  1.00000  1.00000  1.00000  1.00000    10
+#>  R_version 28.38753 28.5395 27.92673 27.94477 27.41266 26.86095    10
 ```
 
 ### Approximations for various ![x_0](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;x_0 "x_0")
@@ -390,7 +402,7 @@ for (i in 1:length(x_0s)){
 end_time <- Sys.time()
 
 print(end_time-start_time)
-#> Time difference of 0.3894539 secs
+#> Time difference of 0.9076591 secs
 ```
 
 That’s over 150 time speed up.
@@ -412,7 +424,7 @@ for (i in 1:length(x_0s)){
 end_time <- Sys.time()
 
 print((end_time-start_time)/10)
-#> Time difference of 0.3800671 secs
+#> Time difference of 0.632981 secs
 ```
 
 Even shorter!

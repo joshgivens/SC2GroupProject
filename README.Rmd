@@ -1,6 +1,10 @@
 ---
 title: "README"
-output: github_document
+output: 
+  github_document:
+    toc: true
+  pdf_document:
+    toc: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
